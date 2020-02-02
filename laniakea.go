@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/geobeau/laniakea/storage/btree"
+	"github.com/geobeau/laniakea/memtable"
 )
 
 func main() {
-	bt := btree.Btree{}
-	bt.Set("test", "data")
+	bt := memtable.NewRollingMemtable()
+	bt.Set("test", nil)
 	bt.Get("test")
 }

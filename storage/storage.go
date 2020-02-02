@@ -1,7 +1,7 @@
 package storage
 
 type storage interface {
-	get(string) ([]byte, error)
-	set(string, []byte) error
-	delete(string) error
+	Get(string) ([]byte, error)
+	Set(string, []byte) error
+	Delete(string) error
 }
