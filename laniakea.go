@@ -6,6 +6,6 @@ import (
 
 func main() {
 	bt := memtable.NewRollingMemtable()
-	bt.Set("test", nil)
+	bt.Set("test", memtable.Element{})
 	bt.Get("test")
 }
