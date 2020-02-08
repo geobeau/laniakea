@@ -9,14 +9,15 @@ type elementNode struct {
 	next []*Element
 }
 
+// Element represent the key-value pair that is inserted in the skiplist
 type Element struct {
 	elementNode
-	key   float64
+	key   string
 	value interface{}
 }
 
 // Key allows retrieval of the key for a given Element
-func (e *Element) Key() float64 {
+func (e *Element) Key() string {
 	return e.key
 }
 
@@ -27,10 +28,11 @@ func (e *Element) Value() interface{} {
 
 // Next returns the following Element or nil if we're at the end of the list.
 // Only operates on the bottom level of the skip list (a fully linked list).
-func (element *Element) Next() *Element {
-	return element.next[0]
+func (e *Element) Next() *Element {
+	return e.next[0]
 }
 
+// SkipList is the implementation of a skiplist
 type SkipList struct {
 	elementNode
 	maxLevel       int
