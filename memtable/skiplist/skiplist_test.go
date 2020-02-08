@@ -16,7 +16,7 @@ func init() {
 	benchList = New()
 
 	for i := 0; i <= 10000000; i++ {
-		benchList.Set(string(i), [1]byte{})
+		benchList.Set(strconv.Itoa(i), [1]byte{})
 	}
 
 	// Display the sizes of our basic structs
@@ -162,23 +162,21 @@ func TestConcurrency(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		var i int
-		for i = 0; i < 100000; i++ {
-			list.Set(string(i), i)
+		for i := 0; i < 100000; i++ {
+			list.Set(strconv.Itoa(i), i)
 		}
-		print(i)
 		wg.Done()
 	}()
 
-	// go func() {
-	// 	for i := 0; i < 100000; i++ {
-	// 		list.Get(string(i))
-	// 	}
-	// 	wg.Done()
-	// }()
+	go func() {
+		for i := 0; i < 100000; i++ {
+			list.Set(strconv.Itoa(i), i)
+		}
+		wg.Done()
+	}()
 
 	wg.Wait()
-	print(list.Length)
+	fmt.Println(list.Length)
 	if list.Length != 100000 {
 		t.Fail()
 	}
@@ -189,7 +187,7 @@ func BenchmarkIncSet(b *testing.B) {
 	list := New()
 
 	for i := 0; i < b.N; i++ {
-		list.Set(string(i), [1]byte{})
+		list.Set(strconv.Itoa(i), [1]byte{})
 	}
 
 	b.SetBytes(int64(b.N))
@@ -198,7 +196,7 @@ func BenchmarkIncSet(b *testing.B) {
 func BenchmarkIncGet(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		res := benchList.Get(string(i))
+		res := benchList.Get(strconv.Itoa(i))
 		if res == nil {
 			b.Fatal("failed to Get an element that should exist")
 		}
@@ -212,7 +210,7 @@ func BenchmarkDecSet(b *testing.B) {
 	list := New()
 
 	for i := b.N; i > 0; i-- {
-		list.Set(string(i), [1]byte{})
+		list.Set(strconv.Itoa(i), [1]byte{})
 	}
 
 	b.SetBytes(int64(b.N))
@@ -221,7 +219,7 @@ func BenchmarkDecSet(b *testing.B) {
 func BenchmarkDecGet(b *testing.B) {
 	b.ReportAllocs()
 	for i := b.N; i > 0; i-- {
-		res := benchList.Get(string(i))
+		res := benchList.Get(strconv.Itoa(i))
 		if res == nil {
 			b.Fatal("failed to Get an element that should exist", i)
 		}
