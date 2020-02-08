@@ -22,44 +22,53 @@ func NewRollingMemtable() RollingMemtable {
 }
 
 // Get a key from the memtables
-func (m *RollingMemtable) Get(string) ([]byte, error) {
+func (m *RollingMemtable) Get(key string) Element {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	m.activeTable.Get(string)
+	return m.activeTable.get(key)
 }
 
 // Set a key to the active memtable
-func (m *RollingMemtable) Set(string, []byte) error {
+func (m *RollingMemtable) Set(key string, value Element) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
+	m.activeTable.set(key, value)
 }
 
 // Delete a key from the active memtable
-func (m *RollingMemtable) Delete(string) error {
+func (m *RollingMemtable) Delete(key string) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
-
+	m.activeTable.delete(key)
 }
 
 type memtable struct {
 	skiplist *skiplist.SkipList
 }
 
+// Element is an element containing the value of an object and flags
+type Element struct {
+	tombstone bool
+	Value     []byte
+}
+
 func newMemtable() memtable {
 	return memtable{skiplist.New()}
 }
 
-func (m *memtable) get(string) ([]byte, error) {
-	m.skiplist.Get()
+func (m *memtable) get(key string) Element {
+	elem := m.skiplist.Get(key)
+	return elem.Value().(Element)
 }
 
-func (m *memtable) set(string, []byte) error {
-	m.skiplist.Set()
+func (m *memtable) set(key string, value Element) {
+	m.skiplist.Set(key, value)
 }
 
-// Delete a key from the active memtable
-func (m *memtable) delete(string) error {
-	m.skiplist.Remove()
+func (m *memtable) delete(key string) {
+	// TODO: Implement tombstone
+	elem := Element{tombstone: true}
+	m.skiplist.Set(key, elem)
 }
