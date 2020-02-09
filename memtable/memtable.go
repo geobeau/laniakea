@@ -24,10 +24,10 @@ func NewRollingMemtable() RollingMemtable {
 	}
 }
 
-func (m *RollingMemtable) flushActive() {
+// FlushActive add the active memtable and add it to the flush queue
+func (m *RollingMemtable) FlushActive() {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	m.flushQueue.PushFront(m.activeTable)
 	m.activeTable = newMemtable()
 }
@@ -42,8 +42,8 @@ func (m *RollingMemtable) Get(key string) (Element, bool) {
 		return elem, found
 	}
 	for e := m.flushQueue.Front(); e != nil; e = e.Next() {
-		table := e.Value.(memtable)
-		table.get(key)
+		table := e.Value.(*memtable)
+		elem, found = table.get(key)
 		if found {
 			return elem, found
 		}
@@ -85,7 +85,10 @@ func (m *memtable) get(key string) (Element, bool) {
 	if elem == nil {
 		return Element{}, false
 	}
-	return elem.Value().(Element), true
+	value := elem.Value().(Element)
+	// If we find a tombstoned value, return that we didn't find it
+	// TODO: should be improved
+	return value, !value.tombstone
 }
 
 func (m *memtable) set(key string, value Element) {
