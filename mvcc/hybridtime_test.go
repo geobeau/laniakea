@@ -55,5 +55,22 @@ func TestClockConcurrency(t *testing.T) {
 			t.Error("Concurrency issues, clock went into past")
 		}
 	}
+}
 
+func TestAfter(t *testing.T) {
+	ht1 := hybridTimestamp{1, 1}
+	ht2 := hybridTimestamp{1, 2}
+	ht3 := hybridTimestamp{2, 0}
+	if ht1.after(ht2) {
+		t.Error("After return true if it's before (logical clock)")
+	}
+	if ht2.after(ht3) {
+		t.Error("After return true if it's before (wall clock)")
+	}
+	if !ht2.after(ht1) {
+		t.Error("After return false if it's after (logical clock)")
+	}
+	if !ht3.after(ht2) {
+		t.Error("After return false if it's after (wall clock)")
+	}
 }
