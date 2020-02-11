@@ -8,6 +8,6 @@ import (
 func main() {
 	mvcc.Clock.Start()
 	bt := memtable.NewRollingMemtable()
-	bt.Set("test", memtable.Element{})
+	bt.Set(mvcc.NewElement("test", []byte("hello world")))
 	bt.Get("test")
 }

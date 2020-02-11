@@ -13,3 +13,8 @@ type Element struct {
 func NewElement(key string, value []byte) Element {
 	return Element{Clock.now(), key, value, false}
 }
+
+// NewTombstone return a tombstone for a key
+func NewTombstone(key string) Element {
+	return Element{Clock.now(), key, nil, true}
+}

@@ -1,9 +1,14 @@
 package mvcc
 
-import "testing"
+import (
+	"testing"
+)
+
+func init() {
+	Clock.Start()
+}
 
 func TestClockIsMonotonicAfterUpdate(t *testing.T) {
-	Clock.Start()
 	ts := Clock.now()
 	oldWall := Clock.lastWall
 	ts.wall = 0
@@ -14,7 +19,6 @@ func TestClockIsMonotonicAfterUpdate(t *testing.T) {
 }
 
 func TestClockIsUpdatable(t *testing.T) {
-	Clock.Start()
 	ts := Clock.now()
 	oldWall := Clock.lastWall
 	ts.wall = oldWall + 1000*1000*1000*1000*1000
@@ -29,7 +33,6 @@ func TestClockIsUpdatable(t *testing.T) {
 }
 
 func TestClockConcurrency(t *testing.T) {
-	Clock.Start()
 	workerNum := 100
 	chanResult := make(chan bool)
 	worker := func() {

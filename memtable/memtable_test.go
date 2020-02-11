@@ -1,24 +1,32 @@
 package memtable
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/geobeau/laniakea/mvcc"
+)
+
+func init() {
+	mvcc.Clock.Start()
+}
 
 func TestCRUD(t *testing.T) {
 	memstore := NewRollingMemtable()
 
-	memstore.Set("key1", Element{Value: []byte("testval1")})
-	memstore.Set("key2", Element{Value: []byte("testval2")})
-	memstore.Set("key3", Element{Value: []byte("testval3")})
-	memstore.Set("key4", Element{Value: []byte("testval4")})
-	memstore.Set("key5", Element{Value: []byte("testval5")})
-	memstore.Set("key6", Element{Value: []byte("testval6")})
+	memstore.Set(mvcc.Element{Key: "key1", Value: []byte("testval1")})
+	memstore.Set(mvcc.Element{Key: "key2", Value: []byte("testval2")})
+	memstore.Set(mvcc.Element{Key: "key3", Value: []byte("testval3")})
+	memstore.Set(mvcc.Element{Key: "key4", Value: []byte("testval4")})
+	memstore.Set(mvcc.Element{Key: "key5", Value: []byte("testval5")})
+	memstore.Set(mvcc.Element{Key: "key6", Value: []byte("testval6")})
 
 	memstore.Delete("key1")
 	memstore.Delete("key3")
 	memstore.Delete("key6")
 
-	memstore.Set("key4", Element{Value: []byte("testval40")})
-	memstore.Set("key5", Element{Value: []byte("testval50")})
-	memstore.Set("key6", Element{Value: []byte("testval60")})
+	memstore.Set(mvcc.Element{Key: "key4", Value: []byte("testval40")})
+	memstore.Set(mvcc.Element{Key: "key5", Value: []byte("testval50")})
+	memstore.Set(mvcc.Element{Key: "key6", Value: []byte("testval60")})
 
 	_, found := memstore.Get("key7")
 	if found != false {
@@ -49,8 +57,8 @@ func TestCRUD(t *testing.T) {
 func TestGetIsDoneInMultipleMemtable(t *testing.T) {
 	memstore := NewRollingMemtable()
 
-	memstore.Set("key1", Element{Value: []byte("testval1")})
-	memstore.Set("key2", Element{Value: []byte("testval2")})
+	memstore.Set(mvcc.Element{Key: "key1", Value: []byte("testval1")})
+	memstore.Set(mvcc.Element{Key: "key2", Value: []byte("testval2")})
 
 	elem, found := memstore.Get("key1")
 	if found != true || string(elem.Value) != "testval1" {
@@ -64,7 +72,7 @@ func TestGetIsDoneInMultipleMemtable(t *testing.T) {
 		t.Error("Key is not found after the flush")
 	}
 
-	memstore.Set("key2", Element{Value: []byte("testval20")})
+	memstore.Set(mvcc.Element{Key: "key2", Value: []byte("testval20")})
 	elem, found = memstore.Get("key2")
 	if found != true || string(elem.Value) != "testval20" {
 		t.Error("New key in active table is not found")

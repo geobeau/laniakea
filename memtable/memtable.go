@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/geobeau/laniakea/memtable/skiplist"
+	"github.com/geobeau/laniakea/mvcc"
 )
 
 // RollingMemtable contains the dataset in memory
@@ -33,7 +34,7 @@ func (m *RollingMemtable) FlushActive() {
 }
 
 // Get a key from the memtables
-func (m *RollingMemtable) Get(key string) (Element, bool) {
+func (m *RollingMemtable) Get(key string) (mvcc.Element, bool) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -48,15 +49,15 @@ func (m *RollingMemtable) Get(key string) (Element, bool) {
 			return elem, found
 		}
 	}
-	return Element{}, false
+	return mvcc.Element{}, false
 }
 
 // Set a key to the active memtable
-func (m *RollingMemtable) Set(key string, value Element) {
+func (m *RollingMemtable) Set(elem mvcc.Element) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	m.activeTable.set(key, value)
+	m.activeTable.set(elem)
 }
 
 // Delete a key from the active memtable
@@ -70,33 +71,27 @@ type memtable struct {
 	skiplist *skiplist.SkipList
 }
 
-// Element is an element containing the value of an object and flags
-type Element struct {
-	tombstone bool
-	Value     []byte
-}
-
 func newMemtable() *memtable {
 	return &memtable{skiplist.New()}
 }
 
-func (m *memtable) get(key string) (Element, bool) {
-	elem := m.skiplist.Get(key)
-	if elem == nil {
-		return Element{}, false
+func (m *memtable) get(key string) (mvcc.Element, bool) {
+	data := m.skiplist.Get(key)
+	if data == nil {
+		return mvcc.Element{}, false
 	}
-	value := elem.Value().(Element)
+	elem := data.Value().(mvcc.Element)
 	// If we find a tombstoned value, return that we didn't find it
 	// TODO: should be improved
-	return value, !value.tombstone
+	return elem, !elem.Tombstone
 }
 
-func (m *memtable) set(key string, value Element) {
-	m.skiplist.Set(key, value)
+func (m *memtable) set(elem mvcc.Element) {
+	m.skiplist.Set(elem.Key, elem)
 }
 
 func (m *memtable) delete(key string) {
 	// TODO: Implement tombstone
-	elem := Element{tombstone: true}
+	elem := mvcc.NewTombstone(key)
 	m.skiplist.Set(key, elem)
 }
