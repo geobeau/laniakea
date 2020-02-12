@@ -53,11 +53,11 @@ func (m *RollingMemtable) Get(key string) (mvcc.Element, bool) {
 }
 
 // Set a key to the active memtable
-func (m *RollingMemtable) Set(elem mvcc.Element) {
+func (m *RollingMemtable) Set(elem mvcc.Element) bool {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	m.activeTable.set(elem)
+	return m.activeTable.set(elem)
 }
 
 // Delete a key from the active memtable
