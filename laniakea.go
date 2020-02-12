@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/geobeau/laniakea/memtable"
-	"github.com/geobeau/laniakea/mvcc"
+	"github.com/geobeau/laniakea/pkg/memtable"
+	"github.com/geobeau/laniakea/pkg/mvcc"
 )
 
 func main() {

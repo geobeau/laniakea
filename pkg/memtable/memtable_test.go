@@ -3,7 +3,7 @@ package memtable
 import (
 	"testing"
 
-	"github.com/geobeau/laniakea/mvcc"
+	"github.com/geobeau/laniakea/pkg/mvcc"
 )
 
 func init() {

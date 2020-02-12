@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"sync"
 
-	"github.com/geobeau/laniakea/memtable/skiplist"
-	"github.com/geobeau/laniakea/mvcc"
+	"github.com/geobeau/laniakea/pkg/memtable/skiplist"
+	"github.com/geobeau/laniakea/pkg/mvcc"
 )
 
 // RollingMemtable contains the dataset in memory
