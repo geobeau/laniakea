@@ -12,21 +12,20 @@ func init() {
 
 func TestCRUD(t *testing.T) {
 	memstore := NewRollingMemtable()
-
-	memstore.Set(mvcc.Element{Key: "key1", Value: []byte("testval1")})
-	memstore.Set(mvcc.Element{Key: "key2", Value: []byte("testval2")})
-	memstore.Set(mvcc.Element{Key: "key3", Value: []byte("testval3")})
-	memstore.Set(mvcc.Element{Key: "key4", Value: []byte("testval4")})
-	memstore.Set(mvcc.Element{Key: "key5", Value: []byte("testval5")})
-	memstore.Set(mvcc.Element{Key: "key6", Value: []byte("testval6")})
+	memstore.Set(mvcc.NewElement("key1", []byte("testval1")))
+	memstore.Set(mvcc.NewElement("key2", []byte("testval2")))
+	memstore.Set(mvcc.NewElement("key3", []byte("testval3")))
+	memstore.Set(mvcc.NewElement("key4", []byte("testval4")))
+	memstore.Set(mvcc.NewElement("key5", []byte("testval5")))
+	memstore.Set(mvcc.NewElement("key6", []byte("testval6")))
 
 	memstore.Delete("key1")
 	memstore.Delete("key3")
 	memstore.Delete("key6")
 
-	memstore.Set(mvcc.Element{Key: "key4", Value: []byte("testval40")})
-	memstore.Set(mvcc.Element{Key: "key5", Value: []byte("testval50")})
-	memstore.Set(mvcc.Element{Key: "key6", Value: []byte("testval60")})
+	memstore.Set(mvcc.NewElement("key4", []byte("testval40")))
+	memstore.Set(mvcc.NewElement("key5", []byte("testval50")))
+	memstore.Set(mvcc.NewElement("key6", []byte("testval60")))
 
 	_, found := memstore.Get("key7")
 	if found != false {

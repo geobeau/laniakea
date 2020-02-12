@@ -40,13 +40,13 @@ func (m *RollingMemtable) Get(key string) (mvcc.Element, bool) {
 
 	elem, found := m.activeTable.get(key)
 	if found {
-		return elem, found
+		return elem, !elem.Tombstone
 	}
 	for e := m.flushQueue.Front(); e != nil; e = e.Next() {
 		table := e.Value.(*memtable)
 		elem, found = table.get(key)
 		if found {
-			return elem, found
+			return elem, !elem.Tombstone
 		}
 	}
 	return mvcc.Element{}, false
@@ -80,18 +80,26 @@ func (m *memtable) get(key string) (mvcc.Element, bool) {
 	if data == nil {
 		return mvcc.Element{}, false
 	}
-	elem := data.Value().(mvcc.Element)
+	elemStack := data.Value().(*mvcc.ElemStack)
+	elem := elemStack.GetLatest()
 	// If we find a tombstoned value, return that we didn't find it
 	// TODO: should be improved
-	return elem, !elem.Tombstone
+	return elem, true
 }
 
-func (m *memtable) set(elem mvcc.Element) {
-	m.skiplist.Set(elem.Key, elem)
+func (m *memtable) set(elem mvcc.Element) bool {
+	data := m.skiplist.Get(elem.Key)
+
+	if data == nil {
+		newStack := mvcc.NewElemStack(elem)
+		m.skiplist.Set(elem.Key, &newStack)
+		return true
+	}
+	stack := data.Value().(*mvcc.ElemStack)
+	return stack.Push(elem)
 }
 
 func (m *memtable) delete(key string) {
-	// TODO: Implement tombstone
 	elem := mvcc.NewTombstone(key)
-	m.skiplist.Set(key, elem)
+	m.set(elem)
 }
