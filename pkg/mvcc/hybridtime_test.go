@@ -11,7 +11,7 @@ func init() {
 func TestClockIsMonotonicAfterUpdate(t *testing.T) {
 	ts := Clock.now()
 	oldWall := Clock.lastWall
-	ts.wall = 0
+	ts.Wall = 0
 	Clock.update(ts)
 	if Clock.lastWall != oldWall {
 		t.Error("It's possible to change the value of the clock with a past timestamp")
@@ -21,10 +21,10 @@ func TestClockIsMonotonicAfterUpdate(t *testing.T) {
 func TestClockIsUpdatable(t *testing.T) {
 	ts := Clock.now()
 	oldWall := Clock.lastWall
-	ts.wall = oldWall + 1000*1000*1000*1000*1000
-	ts.logical = 10
+	ts.Wall = oldWall + 1000*1000*1000*1000*1000
+	ts.Logical = 10
 	Clock.update(ts)
-	if Clock.lastWall != ts.wall {
+	if Clock.lastWall != ts.Wall {
 		t.Error("Wall clock is not properly updated")
 	}
 	if Clock.nextLogical != int64(11) {
@@ -58,19 +58,19 @@ func TestClockConcurrency(t *testing.T) {
 }
 
 func TestAfter(t *testing.T) {
-	ht1 := hybridTimestamp{1, 1}
-	ht2 := hybridTimestamp{1, 2}
-	ht3 := hybridTimestamp{2, 0}
+	ht1 := HybridTimestamp{1, 1}
+	ht2 := HybridTimestamp{1, 2}
+	ht3 := HybridTimestamp{2, 0}
 	if ht1.after(ht2) {
-		t.Error("After return true if it's before (logical clock)")
+		t.Error("After return true if it's before (Logical clock)")
 	}
 	if ht2.after(ht3) {
-		t.Error("After return true if it's before (wall clock)")
+		t.Error("After return true if it's before (Wall clock)")
 	}
 	if !ht2.after(ht1) {
-		t.Error("After return false if it's after (logical clock)")
+		t.Error("After return false if it's after (Logical clock)")
 	}
 	if !ht3.after(ht2) {
-		t.Error("After return false if it's after (wall clock)")
+		t.Error("After return false if it's after (Wall clock)")
 	}
 }

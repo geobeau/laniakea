@@ -19,9 +19,9 @@ func TestCRUD(t *testing.T) {
 	memstore.Set(mvcc.NewElement("key5", []byte("testval5")))
 	memstore.Set(mvcc.NewElement("key6", []byte("testval6")))
 
-	memstore.Delete("key1")
-	memstore.Delete("key3")
-	memstore.Delete("key6")
+	memstore.Set(mvcc.NewTombstone("key1"))
+	memstore.Set(mvcc.NewTombstone("key3"))
+	memstore.Set(mvcc.NewTombstone("key6"))
 
 	memstore.Set(mvcc.NewElement("key4", []byte("testval40")))
 	memstore.Set(mvcc.NewElement("key5", []byte("testval50")))

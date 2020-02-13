@@ -11,9 +11,9 @@ type hybridtime struct {
 	mutex       *sync.Mutex
 }
 
-type hybridTimestamp struct {
-	wall    int64
-	logical int64
+type HybridTimestamp struct {
+	Wall    int64
+	Logical int64
 }
 
 // Clock is the global state of the clock
@@ -23,38 +23,38 @@ func (ht *hybridtime) Start() {
 	Clock = &hybridtime{0, 0, &sync.Mutex{}}
 }
 
-func (ht *hybridtime) now() hybridTimestamp {
+func (ht *hybridtime) now() HybridTimestamp {
 	ht.mutex.Lock()
 	defer ht.mutex.Unlock()
 	curPhysical := time.Now().UnixNano()
 	if ht.lastWall < curPhysical {
 		ht.lastWall = curPhysical
 		ht.nextLogical = 1
-		return hybridTimestamp{wall: curPhysical, logical: 0}
+		return HybridTimestamp{Wall: curPhysical, Logical: 0}
 	}
 	ht.nextLogical++
-	return hybridTimestamp{wall: ht.lastWall, logical: ht.nextLogical - 1}
+	return HybridTimestamp{Wall: ht.lastWall, Logical: ht.nextLogical - 1}
 }
 
-func (ht *hybridtime) update(ts hybridTimestamp) {
+func (ht *hybridtime) update(ts HybridTimestamp) {
 	ht.mutex.Lock()
 	defer ht.mutex.Unlock()
-	if ht.lastWall < ts.wall {
-		ht.lastWall = ts.wall
-		ht.nextLogical = ts.logical + 1
+	if ht.lastWall < ts.Wall {
+		ht.lastWall = ts.Wall
+		ht.nextLogical = ts.Logical + 1
 		return
 	}
 	return
 }
 
-func (ht *hybridTimestamp) after(ts hybridTimestamp) bool {
-	if ht.wall > ts.wall {
+func (ht *HybridTimestamp) after(ts HybridTimestamp) bool {
+	if ht.Wall > ts.Wall {
 		return true
-	} else if ht.wall < ts.wall {
+	} else if ht.Wall < ts.Wall {
 		return false
 	}
-	// If both wall are equal we compare the logical part
-	if ht.logical > ts.logical {
+	// If both Wall are equal we compare the Logical part
+	if ht.Logical > ts.Logical {
 		return true
 	}
 	return false

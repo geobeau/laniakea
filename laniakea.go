@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/geobeau/laniakea/pkg/memtable"
 	"github.com/geobeau/laniakea/pkg/mvcc"
+	"github.com/geobeau/laniakea/pkg/storage"
+	"time"
 )
 
 func main() {
 	mvcc.Clock.Start()
-	bt := memtable.NewRollingMemtable()
-	bt.Set(mvcc.NewElement("test", []byte("hello world")))
-	bt.Get("test")
+	sto := storage.NewStorage()
+	sto.Set(mvcc.NewElement("test", []byte("hello world")))
+	sto.Get("test")
+	time.Sleep(100 * time.Second)
 }

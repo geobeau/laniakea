@@ -11,7 +11,7 @@ func init() {
 
 func TestConstructorIsValid(t *testing.T) {
 	elem := NewElement("test", []byte("data"))
-	if elem.Timestamp.wall <= 0 {
+	if elem.Timestamp.Wall <= 0 {
 		t.Error("Timestamp is not properly initialized")
 	}
 	if elem.Key != "test" || string(elem.Value) != "data" {
@@ -24,7 +24,7 @@ func TestConstructorIsValid(t *testing.T) {
 
 func TestTombstoneReturnTombstone(t *testing.T) {
 	elem := NewTombstone("test")
-	if elem.Timestamp.wall <= 0 {
+	if elem.Timestamp.Wall <= 0 {
 		t.Error("Timestamp is not properly initialized")
 	}
 	if elem.Key != "test" {
@@ -89,7 +89,7 @@ func TestGetWithTimestampReturnFalseIfOlder(t *testing.T) {
 	stack.Push(elem2)
 	stack.Push(elem3)
 	ts := elem1.Timestamp
-	ts.wall -= 100
+	ts.Wall -= 100
 	_, found := stack.GetWithTimestamp(ts)
 
 	if found {

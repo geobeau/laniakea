@@ -5,7 +5,7 @@ import "sync"
 // Element is a MVCC element composed of a key/value, an hybridTime timestamp
 // and a tombstone flag
 type Element struct {
-	Timestamp hybridTimestamp
+	Timestamp HybridTimestamp
 	Key       string
 	Value     []byte
 	Tombstone bool
@@ -34,7 +34,7 @@ func NewElemStack(elem Element) ElemStack {
 }
 
 // GetWithTimestamp Get the newest element before a specific timestamp
-func (es *ElemStack) GetWithTimestamp(ht hybridTimestamp) (Element, bool) {
+func (es *ElemStack) GetWithTimestamp(ht HybridTimestamp) (Element, bool) {
 	es.mutex.RLock()
 	defer es.mutex.RUnlock()
 	if len(es.stack) == 0 {

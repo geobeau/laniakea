@@ -60,13 +60,6 @@ func (m *RollingMemtable) Set(elem mvcc.Element) bool {
 	return m.activeTable.set(elem)
 }
 
-// Delete a key from the active memtable
-func (m *RollingMemtable) Delete(key string) {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-	m.activeTable.delete(key)
-}
-
 type memtable struct {
 	skiplist *skiplist.SkipList
 }
@@ -97,9 +90,4 @@ func (m *memtable) set(elem mvcc.Element) bool {
 	}
 	stack := data.Value().(*mvcc.ElemStack)
 	return stack.Push(elem)
-}
-
-func (m *memtable) delete(key string) {
-	elem := mvcc.NewTombstone(key)
-	m.set(elem)
 }
