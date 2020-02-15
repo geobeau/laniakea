@@ -14,7 +14,9 @@ type Storage struct {
 
 // NewStorage return a new Storage struct
 func NewStorage() Storage {
-	storage := Storage{memtable: memtable.NewRollingMemtable(), wal: wal.Wal{}}
+	memtable := memtable.NewRollingMemtable()
+
+	storage := Storage{memtable: memtable, wal: wal.Wal{Memtable: &memtable}}
 	storage.wal.Start()
 	return storage
 }

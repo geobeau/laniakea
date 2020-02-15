@@ -2,9 +2,11 @@ package wal
 
 import (
 	"encoding/binary"
+	"io"
 	"log"
 	"os"
 
+	"github.com/geobeau/laniakea/pkg/memtable"
 	"github.com/geobeau/laniakea/pkg/mvcc"
 	proto "github.com/golang/protobuf/proto"
 )
@@ -14,6 +16,8 @@ type Wal struct {
 	receiverChan chan mvcc.Element
 	controlChan  chan bool
 	file         *os.File
+	cursor       int64
+	Memtable     *memtable.RollingMemtable
 }
 
 // Start the WAL service
@@ -22,7 +26,7 @@ func (w *Wal) Start() {
 	w.receiverChan = make(chan mvcc.Element, 10)
 	w.controlChan = make(chan bool, 10)
 	w.prepareFile()
-	log.Println(string(w.read().Value))
+	w.recoverFromWal()
 	go w.appender()
 }
 
@@ -61,22 +65,54 @@ func (w *Wal) prepareFile() {
 		log.Fatal(err)
 	}
 	w.file = file
+	w.cursor = 0
 }
 
-func (w *Wal) read() mvcc.Element {
+func (w *Wal) recoverFromWal() {
+	log.Println("Recovering from WAL")
+	var err error
+	var elem mvcc.Element
+
+	for {
+		elem, err = w.readNext()
+		if err == io.EOF {
+			return
+		} else if err != nil {
+			log.Fatalln("Error while recovering from WAL: ", err)
+		}
+		w.Memtable.Set(elem)
+	}
+}
+
+func (w *Wal) readNext() (mvcc.Element, error) {
 	serializedSize := make([]byte, 4)
-	w.file.ReadAt(serializedSize, 0)
+	_, err := w.file.ReadAt(serializedSize, w.cursor)
+	if err != nil {
+		return mvcc.Element{}, err
+	}
+
 	size := binary.BigEndian.Uint32(serializedSize)
 	serializedElem := make([]byte, size)
-	w.file.ReadAt(serializedElem, 4)
+	_, err = w.file.ReadAt(serializedElem, w.cursor+4)
+	if err != nil {
+		return mvcc.Element{}, err
+	}
+
 	entry := &Entry{}
-	proto.Unmarshal(serializedElem, entry)
-	return mvcc.Element{
+	err = proto.Unmarshal(serializedElem, entry)
+	if err != nil {
+		return mvcc.Element{}, err
+	}
+
+	elem := mvcc.Element{
 		Timestamp: mvcc.HybridTimestamp{Wall: entry.GetTs().GetWall(), Logical: entry.GetTs().GetLogical()},
 		Tombstone: entry.GetTombstone(),
 		Key:       entry.GetKey(),
 		Value:     entry.GetVal(),
 	}
+
+	w.cursor += int64(4 + size)
+	return elem, nil
 }
 
 func serialize(elem mvcc.Element) ([]byte, error) {
