@@ -98,7 +98,7 @@ func (w *Wal) readNext() (mvcc.Element, error) {
 		return mvcc.Element{}, err
 	}
 
-	entry := &Entry{}
+	entry := &mvcc.ProtoElement{}
 	err = proto.Unmarshal(serializedElem, entry)
 	if err != nil {
 		return mvcc.Element{}, err
@@ -116,8 +116,8 @@ func (w *Wal) readNext() (mvcc.Element, error) {
 }
 
 func serialize(elem mvcc.Element) ([]byte, error) {
-	protoEntry := &Entry{
-		Ts:        &HybridTimestamp{Wall: elem.Timestamp.Wall, Logical: elem.Timestamp.Logical},
+	protoEntry := &mvcc.ProtoElement{
+		Ts:        &mvcc.ProtoHybridTimestamp{Wall: elem.Timestamp.Wall, Logical: elem.Timestamp.Logical},
 		Tombstone: elem.Tombstone,
 		Key:       elem.Key,
 		Val:       elem.Value,

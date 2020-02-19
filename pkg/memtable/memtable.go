@@ -6,6 +6,7 @@ import (
 
 	"github.com/geobeau/laniakea/pkg/memtable/skiplist"
 	"github.com/geobeau/laniakea/pkg/mvcc"
+	"github.com/geobeau/laniakea/pkg/sstable"
 )
 
 // RollingMemtable contains the dataset in memory
@@ -90,4 +91,8 @@ func (m *memtable) set(elem mvcc.Element) bool {
 	}
 	stack := data.Value().(*mvcc.ElemStack)
 	return stack.Push(elem)
+}
+
+func (m *memtable) flushToSSTable() {
+	sstable.FlushToSSTable()
 }
