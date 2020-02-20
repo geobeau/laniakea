@@ -16,7 +16,7 @@ type SSTableBuilder struct {
 
 // ElemStackReader read a stream of elementStacks
 type ElemStackReader interface {
-	readNext() mvcc.ElemStack
+	ReadNext() *mvcc.ElemStack
 }
 
 func FlushToSSTable() {

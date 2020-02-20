@@ -96,3 +96,18 @@ func (m *memtable) set(elem mvcc.Element) bool {
 func (m *memtable) flushToSSTable() {
 	sstable.FlushToSSTable()
 }
+
+// MemtableReader Read read all elements of a table in order
+type memtableReader struct {
+	cur *skiplist.Element
+}
+
+func newMemtableReader(m *memtable) memtableReader {
+	return memtableReader{cur: m.skiplist.Front()}
+}
+
+func (mr *memtableReader) ReadNext() *mvcc.ElemStack {
+	elemStack := mr.cur.Value().(*mvcc.ElemStack)
+	mr.cur = mr.cur.Next()
+	return elemStack
+}
