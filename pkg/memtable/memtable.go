@@ -31,7 +31,11 @@ func (m *RollingMemtable) FlushActive() {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	m.flushQueue.PushFront(m.activeTable)
+	oldTable := m.activeTable
 	m.activeTable = newMemtable()
+
+	// TODO: Should async
+	oldTable.flushToSSTable()
 }
 
 // Get a key from the memtables
@@ -94,7 +98,7 @@ func (m *memtable) set(elem mvcc.Element) bool {
 }
 
 func (m *memtable) flushToSSTable() {
-	sstable.FlushToSSTable()
+	sstable.FlushToSSTable(newMemtableReader(m))
 }
 
 // MemtableReader Read read all elements of a table in order
@@ -102,8 +106,8 @@ type memtableReader struct {
 	cur *skiplist.Element
 }
 
-func newMemtableReader(m *memtable) memtableReader {
-	return memtableReader{cur: m.skiplist.Front()}
+func newMemtableReader(m *memtable) *memtableReader {
+	return &memtableReader{cur: m.skiplist.Front()}
 }
 
 func (mr *memtableReader) ReadNext() *mvcc.ElemStack {

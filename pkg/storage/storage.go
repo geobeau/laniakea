@@ -40,3 +40,8 @@ func (s *Storage) Delete(key string) {
 	elem := mvcc.NewTombstone(key)
 	s.Set(elem)
 }
+
+// FlushActive persist to disk the active memtable
+func (s *Storage) FlushActive() {
+	s.memtable.FlushActive()
+}

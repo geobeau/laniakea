@@ -19,8 +19,10 @@ type ElemStackReader interface {
 	ReadNext() *mvcc.ElemStack
 }
 
-func FlushToSSTable() {
+// FlushToSSTable write to disk the content of ElemStackReader
+func FlushToSSTable(ElemStackReader) {
 	builder := SSTableBuilder{}
+	log.Println("Flushing memtable to disk")
 	builder.prepareFiles()
 }
 

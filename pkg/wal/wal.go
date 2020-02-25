@@ -41,7 +41,6 @@ func (w *Wal) appender() {
 	for {
 		select {
 		case elem = <-w.receiverChan:
-			log.Println("Received something", elem)
 			serializedData, err := serialize(elem)
 			if err != nil {
 				log.Fatalln(err)
